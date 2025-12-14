@@ -12,10 +12,11 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  background: url('bg.jpg') center/cover no-repeat;
   font-family:system-ui;
   color:white;
 }
+
 .card{
   width:350px;
   padding:26px;
@@ -25,12 +26,15 @@ body{
   box-shadow:0 25px 50px rgba(0,0,0,.4);
   text-align:center;
 }
+
 h2{
   margin-bottom:18px;
 }
+
 .field{
   margin-bottom:12px;
 }
+
 .field input{
   width:100%;
   padding:12px 16px;
@@ -40,9 +44,11 @@ h2{
   color:white;
   outline:none;
 }
+
 .field input::placeholder{
   color:#ddd;
 }
+
 button{
   width:100%;
   padding:12px;
@@ -52,15 +58,18 @@ button{
   cursor:pointer;
   font-weight:600;
 }
+
 .login{
   background:#fff;
   color:#000;
 }
+
 .signup{
   background:transparent;
   color:#fff;
   border:1px solid #fff;
 }
+
 #msg{
   margin-top:15px;
   font-size:14px;
@@ -88,7 +97,7 @@ button{
   <div id="msg"></div>
 </div>
 
-<!-- 🔥 Firebase MODULE CDN (مطابق لملفك) -->
+<!-- 🔥 Firebase MODULE CDN -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import {
@@ -97,7 +106,7 @@ import {
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
-/* ✅ firebaseConfig (من ملفك حرفيًا) */
+/* ✅ firebaseConfig الخاص بك */
 const firebaseConfig = {
   apiKey: "AIzaSyB0QIjuUMgf2ehtxxvGEPsRLNxunImLBVU",
   authDomain: "moumen-login.firebaseapp.com",
@@ -112,15 +121,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-
 const msg = document.getElementById("msg");
 
-/* 🔐 Login */
+/* 🔐 Login (مسجل سابقًا فقط) */
 document.getElementById("loginBtn").onclick = () => {
   signInWithPopup(auth, provider)
     .then(result => {
       if (result.additionalUserInfo.isNewUser) {
-        // مستخدم جديد حاول تسجيل دخول
         result.user.delete();
         msg.innerText =
           "This account is not registered. Please sign up first.";
@@ -134,7 +141,7 @@ document.getElementById("loginBtn").onclick = () => {
     });
 };
 
-/* 🆕 Sign Up */
+/* 🆕 Sign Up (تسجيل جديد فقط) */
 document.getElementById("signupBtn").onclick = () => {
   signInWithPopup(auth, provider)
     .then(result => {
