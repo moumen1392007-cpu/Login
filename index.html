@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+here<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login / Sign Up</title>
+<title>Glass Login</title>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -15,6 +15,7 @@
   --glass:rgba(255,255,255,.15);
   --border:rgba(255,255,255,.35);
   --text:#eaf6f4;
+  --muted:#b8d7d2;
   --accent:#ffffff;
 }
 
@@ -37,9 +38,10 @@ body{
 
 .card{
   width:360px;
-  padding:26px;
+  padding:28px;
   background:var(--glass);
   backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
   border:1px solid var(--border);
   border-radius:18px;
   box-shadow:0 30px 60px rgba(0,0,0,.35);
@@ -47,9 +49,38 @@ body{
 
 .title{
   text-align:center;
-  margin-bottom:18px;
-  font-size:18px;
+  margin-bottom:20px;
+  padding:8px;
   font-weight:600;
+  background:rgba(255,255,255,.25);
+  color:#0b2f2a;
+  border-radius:10px;
+}
+
+.field{
+  margin-bottom:14px;
+}
+
+.field input{
+  width:100%;
+  padding:12px 16px;
+  border-radius:22px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.12);
+  color:var(--text);
+  outline:none;
+}
+
+.field input::placeholder{
+  color:var(--muted);
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  margin:10px 2px 16px;
+  color:var(--muted);
 }
 
 .btn{
@@ -62,26 +93,15 @@ body{
   margin-bottom:10px;
 }
 
-.btn.primary{
-  background:#fff;
+.btn.login{
+  background:linear-gradient(180deg,#ffffff,#e9f3f1);
   color:#0b2f2a;
 }
 
-.btn.secondary{
+.btn.signup{
   background:transparent;
   border:1px solid var(--border);
   color:var(--text);
-}
-
-input{
-  width:100%;
-  padding:12px;
-  border-radius:22px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.12);
-  color:white;
-  margin-bottom:10px;
-  outline:none;
 }
 
 .message{
@@ -90,99 +110,24 @@ input{
   margin:10px 0;
 }
 
-.hidden{
-  display:none;
-}
+.hidden{display:none}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <div class="title">Authentication</div>
+  <div class="title">Login</div>
 
-  <button class="btn primary" onclick="login()">Login with Google</button>
-  <button class="btn secondary" onclick="signup()">Sign Up with Google</button>
-
-  <div id="message" class="message"></div>
-
-  <!-- يظهر فقط عند تسجيل جديد -->
-  <div id="signupForm" class="hidden">
-    <input type="text" id="name" placeholder="Your name (required)">
-    <input type="file" id="photo" accept="image/*">
-    <button class="btn primary" onclick="completeSignup()">Register</button>
+  <div class="field">
+    <input type="text" placeholder="Username" disabled>
   </div>
-</div>
 
-<script>
-/* 🔴 ضع بيانات Firebase الخاصة بك هنا */
-const firebaseConfig = {
-  apiKey: "API_KEY",
-  authDomain: "PROJECT_ID.firebaseapp.com",
-  projectId: "PROJECT_ID"
-};
+  <div class="field">
+    <input type="password" placeholder="Password" disabled>
+  </div>
 
-firebase.initializeApp(firebaseConfig);
+  <button class="btn login" onclick="login()">Login with Google</button>
+  <button class="btn signup" onclick="signup()">Sign Up with Google</button>
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-const provider = new firebase.auth.GoogleAuthProvider();
-
-let tempUser = null;
-
-function showMessage(text){
-  document.getElementById("message").innerText = text;
-}
-
-function login(){
-  auth.signInWithPopup(provider)
-    .then(result=>{
-      const email = result.user.email;
-      db.collection("users").doc(email).get().then(doc=>{
-        if(doc.exists){
-          showMessage("Welcome back! Login successful.");
-        }else{
-          auth.signOut();
-          showMessage("This account is not registered. Please sign up first.");
-        }
-      });
-    })
-    .catch(err=>showMessage(err.message));
-}
-
-function signup(){
-  auth.signInWithPopup(provider)
-    .then(result=>{
-      tempUser = result.user;
-      db.collection("users").doc(tempUser.email).get().then(doc=>{
-        if(doc.exists){
-          showMessage("This account is already registered.");
-        }else{
-          showMessage("Complete your registration.");
-          document.getElementById("signupForm").classList.remove("hidden");
-        }
-      });
-    })
-    .catch(err=>showMessage(err.message));
-}
-
-function completeSignup(){
-  const name = document.getElementById("name").value.trim();
-  if(!name){
-    showMessage("Name is required.");
-    return;
-  }
-
-  db.collection("users").doc(tempUser.email).set({
-    name: name,
-    email: tempUser.email,
-    photo: tempUser.photoURL || ""
-  }).then(()=>{
-    showMessage("Registration successful. You are now logged in.");
-    document.getElementById("signupForm").classList.add("hidden");
-  });
-}
-</script>
-
-</body>
-</html>
+  <div id="message" class="message
