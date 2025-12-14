@@ -1,133 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
+<meta charset="UTF-8">
+<title>Auth</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    :root{
-      --bg:#0b2f2a;
-      --glass:rgba(255,255,255,.15);
-      --border:rgba(255,255,255,.35);
-      --text:#eaf6f4;
-      --muted:#b8d7d2;
-      --accent:#9fe3d8;
-    }
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    *{
-      box-sizing:border-box;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto;
-    }
-
-    body{
-      min-height:100vh;
-      margin:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.65)),
-        url('bg.jpg') center/cover no-repeat;
-      color:var(--text);
-    }
-
-    .card{
-      width:360px;
-      padding:28px;
-      background:var(--glass);
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
-      border:1px solid var(--border);
-      border-radius:18px;
-      box-shadow:0 30px 60px rgba(0,0,0,.35);
-    }
-
-    .title{
-      text-align:center;
-      margin-bottom:20px;
-      padding:8px;
-      font-weight:600;
-      background:rgba(255,255,255,.25);
-      color:#0b2f2a;
-      border-radius:10px;
-    }
-
-    .field{
-      margin-bottom:14px;
-    }
-
-    .field input{
-      width:100%;
-      padding:12px 16px;
-      border-radius:22px;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.12);
-      color:var(--text);
-      outline:none;
-    }
-
-    .field input::placeholder{
-      color:var(--muted);
-    }
-
-    .row{
-      display:flex;
-      justify-content:space-between;
-      font-size:13px;
-      margin:10px 2px 16px;
-      color:var(--muted);
-    }
-
-    .row a{
-      color:var(--accent);
-      text-decoration:none;
-    }
-
-    .btn{
-      width:100%;
-      padding:12px;
-      border-radius:22px;
-      border:none;
-      background:linear-gradient(180deg,#ffffff,#e9f3f1);
-      color:#0b2f2a;
-      font-weight:600;
-      cursor:pointer;
-      box-shadow:0 10px 24px rgba(0,0,0,.25);
-      margin-bottom:10px;
-    }
-
-    .btn.signup{
-      background:transparent;
-      border:1px solid var(--border);
-      color:var(--text);
-      box-shadow:none;
-    }
-  </style>
+<style>
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:#0b2f2a;
+  color:white;
+  font-family:system-ui;
+}
+.card{
+  width:360px;
+  padding:25px;
+  border-radius:16px;
+  background:rgba(255,255,255,.12);
+}
+button,input{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:20px;
+  border:none;
+}
+button{cursor:pointer;font-weight:600}
+.hidden{display:none}
+</style>
 </head>
 
 <body>
 
-  <form class="card">
-    <div class="title">Login</div>
+<div class="card">
+  <h3 align="center">Authentication</h3>
 
-    <div class="field">
-      <input type="text" placeholder="Username" required>
-    </div>
+  <button onclick="login()">Login with Google</button>
+  <button onclick="signup()">Sign Up with Google</button>
 
-    <div class="field">
-      <input type="password" placeholder="Password" required>
-    </div>
+  <p id="msg" align="center"></p>
 
-    <div class="row">
-      <label><input type="checkbox"> Remember me</label>
-      <a href="#">Forgot password</a>
-    </div>
+  <div id="extra" class="hidden">
+    <input id="name" placeholder="Your name (required)">
+    <input type="file" id="photo" accept="image/*">
+    <button onclick="completeSignup()">Register</button>
+  </div>
+</div>
 
-    <button class="btn" type="submit">Login</button>
-    <button class="btn signup" type="button">Sign Up</button>
+<script>
+// 🔥 ضع إعدادات Firebase الخاصة بك هنا
+const firebaseConfig = {
+  apiKey: "API_KEY",
+  authDomain: "PROJECT_ID.firebaseapp.com",
+  projectId: "PROJECT_ID"
+};
 
-  </form>
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+let currentUser = null;
+
+function login(){
+  auth.signInWithPopup(provider).then(res=>{
+    const email = res.user.email;
+    db.collection("users").doc(email).get().then(doc=>{
+      if(doc.exists){
+        msg("Welcome back!");
+      }else{
+        auth.signOut();
+        msg("This account is not registered. Please sign up first.");
+      }
+    });
+  });
+}
+
+function signup(){
+  auth.signInWithPopup(provider).then(res=>{
+    currentUser = res.user;
+    db.collection("users").doc(currentUser.email).get().then(doc=>{
+      if(doc.exists){
+        msg("This account is already registered.");
+      }else{
+        msg("Complete your registration.");
+        document.getElementById("extra").classList.remove("hidden");
+      }
+    });
+  });
+}
+
+function completeSignup(){
+  const name = document.getElementById("name").value;
+  if(!name){ msg("Name is required."); return; }
+
+  db.collection("users").doc(currentUser.email).set({
+    name: name,
+    email: currentUser.email,
+    photo: currentUser.photoURL || ""
+  }).then(()=>{
+    msg("Registration successful. You are now logged in.");
+    document.getElementById("extra").classList.add("hidden");
+  });
+}
+
+function msg(t){
+  document.getElementById("msg").innerText = t;
+}
+</script>
 
 </body>
 </html>
