@@ -2,60 +2,120 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Auth</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login / Sign Up</title>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
+:root{
+  --glass:rgba(255,255,255,.15);
+  --border:rgba(255,255,255,.35);
+  --text:#eaf6f4;
+  --accent:#ffffff;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto;
+}
+
 body{
   min-height:100vh;
+  margin:0;
   display:flex;
-  justify-content:center;
   align-items:center;
-  background:#0b2f2a;
-  color:white;
-  font-family:system-ui;
+  justify-content:center;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.4), rgba(0,0,0,.7)),
+    url('bg.jpg') center/cover no-repeat;
+  color:var(--text);
 }
+
 .card{
   width:360px;
-  padding:25px;
-  border-radius:16px;
-  background:rgba(255,255,255,.12);
+  padding:26px;
+  background:var(--glass);
+  backdrop-filter:blur(14px);
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:0 30px 60px rgba(0,0,0,.35);
 }
-button,input{
+
+.title{
+  text-align:center;
+  margin-bottom:18px;
+  font-size:18px;
+  font-weight:600;
+}
+
+.btn{
   width:100%;
   padding:12px;
-  margin-bottom:10px;
-  border-radius:20px;
+  border-radius:22px;
   border:none;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:10px;
 }
-button{cursor:pointer;font-weight:600}
-.hidden{display:none}
+
+.btn.primary{
+  background:#fff;
+  color:#0b2f2a;
+}
+
+.btn.secondary{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+}
+
+input{
+  width:100%;
+  padding:12px;
+  border-radius:22px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.12);
+  color:white;
+  margin-bottom:10px;
+  outline:none;
+}
+
+.message{
+  text-align:center;
+  font-size:14px;
+  margin:10px 0;
+}
+
+.hidden{
+  display:none;
+}
 </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h3 align="center">Authentication</h3>
+  <div class="title">Authentication</div>
 
-  <button onclick="login()">Login with Google</button>
-  <button onclick="signup()">Sign Up with Google</button>
+  <button class="btn primary" onclick="login()">Login with Google</button>
+  <button class="btn secondary" onclick="signup()">Sign Up with Google</button>
 
-  <p id="msg" align="center"></p>
+  <div id="message" class="message"></div>
 
-  <div id="extra" class="hidden">
-    <input id="name" placeholder="Your name (required)">
+  <!-- يظهر فقط عند تسجيل جديد -->
+  <div id="signupForm" class="hidden">
+    <input type="text" id="name" placeholder="Your name (required)">
     <input type="file" id="photo" accept="image/*">
-    <button onclick="completeSignup()">Register</button>
+    <button class="btn primary" onclick="completeSignup()">Register</button>
   </div>
 </div>
 
 <script>
-// 🔥 ضع إعدادات Firebase الخاصة بك هنا
+/* 🔴 ضع بيانات Firebase الخاصة بك هنا */
 const firebaseConfig = {
   apiKey: "API_KEY",
   authDomain: "PROJECT_ID.firebaseapp.com",
@@ -63,56 +123,64 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 const provider = new firebase.auth.GoogleAuthProvider();
 
-let currentUser = null;
+let tempUser = null;
+
+function showMessage(text){
+  document.getElementById("message").innerText = text;
+}
 
 function login(){
-  auth.signInWithPopup(provider).then(res=>{
-    const email = res.user.email;
-    db.collection("users").doc(email).get().then(doc=>{
-      if(doc.exists){
-        msg("Welcome back!");
-      }else{
-        auth.signOut();
-        msg("This account is not registered. Please sign up first.");
-      }
-    });
-  });
+  auth.signInWithPopup(provider)
+    .then(result=>{
+      const email = result.user.email;
+      db.collection("users").doc(email).get().then(doc=>{
+        if(doc.exists){
+          showMessage("Welcome back! Login successful.");
+        }else{
+          auth.signOut();
+          showMessage("This account is not registered. Please sign up first.");
+        }
+      });
+    })
+    .catch(err=>showMessage(err.message));
 }
 
 function signup(){
-  auth.signInWithPopup(provider).then(res=>{
-    currentUser = res.user;
-    db.collection("users").doc(currentUser.email).get().then(doc=>{
-      if(doc.exists){
-        msg("This account is already registered.");
-      }else{
-        msg("Complete your registration.");
-        document.getElementById("extra").classList.remove("hidden");
-      }
-    });
-  });
+  auth.signInWithPopup(provider)
+    .then(result=>{
+      tempUser = result.user;
+      db.collection("users").doc(tempUser.email).get().then(doc=>{
+        if(doc.exists){
+          showMessage("This account is already registered.");
+        }else{
+          showMessage("Complete your registration.");
+          document.getElementById("signupForm").classList.remove("hidden");
+        }
+      });
+    })
+    .catch(err=>showMessage(err.message));
 }
 
 function completeSignup(){
-  const name = document.getElementById("name").value;
-  if(!name){ msg("Name is required."); return; }
+  const name = document.getElementById("name").value.trim();
+  if(!name){
+    showMessage("Name is required.");
+    return;
+  }
 
-  db.collection("users").doc(currentUser.email).set({
+  db.collection("users").doc(tempUser.email).set({
     name: name,
-    email: currentUser.email,
-    photo: currentUser.photoURL || ""
+    email: tempUser.email,
+    photo: tempUser.photoURL || ""
   }).then(()=>{
-    msg("Registration successful. You are now logged in.");
-    document.getElementById("extra").classList.add("hidden");
+    showMessage("Registration successful. You are now logged in.");
+    document.getElementById("signupForm").classList.add("hidden");
   });
-}
-
-function msg(t){
-  document.getElementById("msg").innerText = t;
 }
 </script>
 
