@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Account</title>
 
-<!-- Firebase CDN (compat) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
 <style>
 body{
   margin:0;
@@ -21,7 +17,7 @@ body{
   color:white;
 }
 .card{
-  width:340px;
+  width:350px;
   padding:26px;
   background:rgba(255,255,255,.15);
   backdrop-filter:blur(16px);
@@ -30,17 +26,31 @@ body{
   text-align:center;
 }
 h2{
-  margin-bottom:20px;
+  margin-bottom:18px;
+}
+.field{
+  margin-bottom:12px;
+}
+.field input{
+  width:100%;
+  padding:12px 16px;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.4);
+  background:rgba(255,255,255,.1);
+  color:white;
+  outline:none;
+}
+.field input::placeholder{
+  color:#ddd;
 }
 button{
   width:100%;
   padding:12px;
-  margin-top:12px;
+  margin-top:10px;
   border-radius:22px;
   border:none;
   cursor:pointer;
   font-weight:600;
-  font-size:15px;
 }
 .login{
   background:#fff;
@@ -52,7 +62,7 @@ button{
   border:1px solid #fff;
 }
 #msg{
-  margin-top:16px;
+  margin-top:15px;
   font-size:14px;
 }
 </style>
@@ -63,35 +73,55 @@ button{
 <div class="card">
   <h2>Account</h2>
 
-  <button class="login" onclick="login()">Login</button>
-  <button class="signup" onclick="signup()">Sign Up</button>
+  <!-- خانات شكلية فقط -->
+  <div class="field">
+    <input type="email" placeholder="Email">
+  </div>
+
+  <div class="field">
+    <input type="password" placeholder="Password">
+  </div>
+
+  <button class="login" id="loginBtn">Login</button>
+  <button class="signup" id="signupBtn">Sign Up</button>
 
   <div id="msg"></div>
 </div>
 
-<script>
-/* 🔥 ضع بيانات Firebase الخاصة بك */
+<!-- 🔥 Firebase MODULE CDN (مطابق لملفك) -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
+/* ✅ firebaseConfig (من ملفك حرفيًا) */
 const firebaseConfig = {
-  apiKey: "API_KEY",
-  authDomain: "PROJECT_ID.firebaseapp.com",
-  projectId: "PROJECT_ID",
-  appId: "APP_ID"
+  apiKey: "AIzaSyB0QIjuUMgf2ehtxxvGEPsRLNxunImLBVU",
+  authDomain: "moumen-login.firebaseapp.com",
+  projectId: "moumen-login",
+  storageBucket: "moumen-login.firebasestorage.app",
+  messagingSenderId: "330344631146",
+  appId: "1:330344631146:web:eea82dc5ca39a1e32fb313",
+  measurementId: "G-5CQZ0VP25Q"
 };
 
 /* Initialize Firebase */
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
 const msg = document.getElementById("msg");
 
-/* 🔐 Login (للمسجل سابقًا فقط) */
-function login(){
-  auth.signInWithPopup(provider)
+/* 🔐 Login */
+document.getElementById("loginBtn").onclick = () => {
+  signInWithPopup(auth, provider)
     .then(result => {
       if (result.additionalUserInfo.isNewUser) {
-        // المستخدم جديد → لا يسمح له بالدخول
-        auth.currentUser.delete();
+        // مستخدم جديد حاول تسجيل دخول
+        result.user.delete();
         msg.innerText =
           "This account is not registered. Please sign up first.";
       } else {
@@ -99,14 +129,14 @@ function login(){
           "Welcome back! Login successful.";
       }
     })
-    .catch(error => {
-      msg.innerText = error.message;
+    .catch(err => {
+      msg.innerText = err.message;
     });
-}
+};
 
-/* 🆕 Sign Up (للتسجيل الجديد فقط) */
-function signup(){
-  auth.signInWithPopup(provider)
+/* 🆕 Sign Up */
+document.getElementById("signupBtn").onclick = () => {
+  signInWithPopup(auth, provider)
     .then(result => {
       if (result.additionalUserInfo.isNewUser) {
         msg.innerText =
@@ -116,10 +146,10 @@ function signup(){
           "This account is already registered. Please log in.";
       }
     })
-    .catch(error => {
-      msg.innerText = error.message;
+    .catch(err => {
+      msg.innerText = err.message;
     });
-}
+};
 </script>
 
 </body>
