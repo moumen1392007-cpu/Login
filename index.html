@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Glass Login</title>
+<title>Login</title>
 
 <style>
 :root{
@@ -50,6 +50,24 @@ body{
   border-radius:10px;
 }
 
+.field{
+  margin-bottom:14px;
+}
+
+.field input{
+  width:100%;
+  padding:12px 16px;
+  border-radius:22px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.12);
+  color:var(--text);
+  outline:none;
+}
+
+.field input::placeholder{
+  color:var(--muted);
+}
+
 .btn{
   width:100%;
   padding:12px;
@@ -57,7 +75,7 @@ body{
   border:none;
   font-weight:600;
   cursor:pointer;
-  margin-bottom:12px;
+  margin-bottom:10px;
 }
 
 .btn.login{
@@ -84,53 +102,85 @@ body{
 <div class="card">
   <div class="title">Login</div>
 
-  <button class="btn login" id="loginBtn">Login with Google</button>
-  <button class="btn signup" id="signupBtn">Sign Up with Google</button>
+  <div class="field">
+    <input type="email" id="email" placeholder="Email">
+  </div>
+
+  <div class="field">
+    <input type="password" id="password" placeholder="Password">
+  </div>
+
+  <button class="btn login" id="loginEmail">Login</button>
+  <button class="btn signup" id="signupEmail">Sign Up</button>
+
+  <hr style="border-color:rgba(255,255,255,.2);margin:16px 0;">
+
+  <button class="btn login" id="googleLogin">Login with Google</button>
 
   <div id="msg" class="message"></div>
 </div>
 
 <!-- 🔥 Firebase CDN (MODULE) -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup } 
-    from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
-  // ✅ Firebase Config (من ملفك)
-  const firebaseConfig = {
-    apiKey: "AIzaSyB0QIjuUMgf2ehtxxvGEPsRLNxunImLBVU",
-    authDomain: "moumen-login.firebaseapp.com",
-    projectId: "moumen-login",
-    storageBucket: "moumen-login.firebasestorage.app",
-    messagingSenderId: "330344631146",
-    appId: "1:330344631146:web:eea82dc5ca39a1e32fb313",
-    measurementId: "G-5CQZ0VP25Q"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyB0QIjuUMgf2ehtxxvGEPsRLNxunImLBVU",
+  authDomain: "moumen-login.firebaseapp.com",
+  projectId: "moumen-login",
+  storageBucket: "moumen-login.firebasestorage.app",
+  messagingSenderId: "330344631146",
+  appId: "1:330344631146:web:eea82dc5ca39a1e32fb313"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-  const msg = document.getElementById("msg");
+const msg = document.getElementById("msg");
 
-  function googleLogin(text){
-    signInWithPopup(auth, provider)
-      .then(() => {
-        msg.innerText = text;
-      })
-      .catch(err => {
-        msg.innerText = err.message;
-      });
-  }
+document.getElementById("loginEmail").onclick = () => {
+  const email = email.value;
+  const password = password.value;
 
-  document.getElementById("loginBtn").onclick = () => {
-    googleLogin("Welcome back! Login successful.");
-  };
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      msg.innerText = "Login successful";
+    })
+    .catch(err => {
+      msg.innerText = err.message;
+    });
+};
 
-  document.getElementById("signupBtn").onclick = () => {
-    googleLogin("Registration successful. You are now logged in.");
-  };
+document.getElementById("signupEmail").onclick = () => {
+  const email = email.value;
+  const password = password.value;
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      msg.innerText = "Account created successfully";
+    })
+    .catch(err => {
+      msg.innerText = err.message;
+    });
+};
+
+document.getElementById("googleLogin").onclick = () => {
+  signInWithPopup(auth, provider)
+    .then(() => {
+      msg.innerText = "Logged in with Google";
+    })
+    .catch(err => {
+      msg.innerText = err.message;
+    });
+};
 </script>
 
 </body>
