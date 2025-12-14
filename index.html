@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Glass Login</title>
 
-<!-- Firebase -->
+<!-- Firebase SDKs (compat) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
 :root{
@@ -16,7 +15,6 @@
   --border:rgba(255,255,255,.35);
   --text:#eaf6f4;
   --muted:#b8d7d2;
-  --accent:#ffffff;
 }
 
 *{
@@ -75,14 +73,6 @@ body{
   color:var(--muted);
 }
 
-.row{
-  display:flex;
-  justify-content:space-between;
-  font-size:13px;
-  margin:10px 2px 16px;
-  color:var(--muted);
-}
-
 .btn{
   width:100%;
   padding:12px;
@@ -107,10 +97,8 @@ body{
 .message{
   text-align:center;
   font-size:14px;
-  margin:10px 0;
+  margin-top:10px;
 }
-
-.hidden{display:none}
 </style>
 </head>
 
@@ -130,4 +118,48 @@ body{
   <button class="btn login" onclick="login()">Login with Google</button>
   <button class="btn signup" onclick="signup()">Sign Up with Google</button>
 
-  <div id="message" class="message
+  <div id="msg" class="message"></div>
+</div>
+
+<script>
+/* 🔥 Firebase Config (خاص بك) */
+const firebaseConfig = {
+  apiKey: "AIzaSyB0QiuUMgf2ehtxvGEPsRLNxuIMLBYw",
+  authDomain: "moumen-login.firebaseapp.com",
+  projectId: "moumen-login",
+  storageBucket: "moumen-login.appspot.com",
+  messagingSenderId: "330344631146",
+  appId: "1:330344631146:web:eea82dc5ca39a1e32fb313",
+  measurementId: "G-5CQZ0VP25Q"
+};
+
+/* Initialize Firebase */
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const provider = new firebase.auth.GoogleAuthProvider();
+
+function login(){
+  auth.signInWithPopup(provider)
+    .then(() => {
+      document.getElementById("msg").innerText =
+        "Welcome back! Login successful.";
+    })
+    .catch(err => {
+      document.getElementById("msg").innerText = err.message;
+    });
+}
+
+function signup(){
+  auth.signInWithPopup(provider)
+    .then(() => {
+      document.getElementById("msg").innerText =
+        "Registration successful. You are now logged in.";
+    })
+    .catch(err => {
+      document.getElementById("msg").innerText = err.message;
+    });
+}
+</script>
+
+</body>
+</html>
