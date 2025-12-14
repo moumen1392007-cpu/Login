@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Glass Login</title>
 
-<!-- Firebase SDKs (compat) -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
 <style>
 :root{
   --glass:rgba(255,255,255,.15);
@@ -39,7 +35,6 @@ body{
   padding:28px;
   background:var(--glass);
   backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
   border:1px solid var(--border);
   border-radius:18px;
   box-shadow:0 30px 60px rgba(0,0,0,.35);
@@ -55,24 +50,6 @@ body{
   border-radius:10px;
 }
 
-.field{
-  margin-bottom:14px;
-}
-
-.field input{
-  width:100%;
-  padding:12px 16px;
-  border-radius:22px;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.12);
-  color:var(--text);
-  outline:none;
-}
-
-.field input::placeholder{
-  color:var(--muted);
-}
-
 .btn{
   width:100%;
   padding:12px;
@@ -80,7 +57,7 @@ body{
   border:none;
   font-weight:600;
   cursor:pointer;
-  margin-bottom:10px;
+  margin-bottom:12px;
 }
 
 .btn.login{
@@ -107,58 +84,53 @@ body{
 <div class="card">
   <div class="title">Login</div>
 
-  <div class="field">
-    <input type="text" placeholder="Username" disabled>
-  </div>
-
-  <div class="field">
-    <input type="password" placeholder="Password" disabled>
-  </div>
-
-  <button class="btn login" onclick="login()">Login with Google</button>
-  <button class="btn signup" onclick="signup()">Sign Up with Google</button>
+  <button class="btn login" id="loginBtn">Login with Google</button>
+  <button class="btn signup" id="signupBtn">Sign Up with Google</button>
 
   <div id="msg" class="message"></div>
 </div>
 
-<script>
-/* 🔥 Firebase Config (خاص بك) */
-const firebaseConfig = {
-  apiKey: "AIzaSyB0QiuUMgf2ehtxvGEPsRLNxuIMLBYw",
-  authDomain: "moumen-login.firebaseapp.com",
-  projectId: "moumen-login",
-  storageBucket: "moumen-login.appspot.com",
-  messagingSenderId: "330344631146",
-  appId: "1:330344631146:web:eea82dc5ca39a1e32fb313",
-  measurementId: "G-5CQZ0VP25Q"
-};
+<!-- 🔥 Firebase CDN (MODULE) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup } 
+    from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
-/* Initialize Firebase */
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const provider = new firebase.auth.GoogleAuthProvider();
+  // ✅ Firebase Config (من ملفك)
+  const firebaseConfig = {
+    apiKey: "AIzaSyB0QIjuUMgf2ehtxxvGEPsRLNxunImLBVU",
+    authDomain: "moumen-login.firebaseapp.com",
+    projectId: "moumen-login",
+    storageBucket: "moumen-login.firebasestorage.app",
+    messagingSenderId: "330344631146",
+    appId: "1:330344631146:web:eea82dc5ca39a1e32fb313",
+    measurementId: "G-5CQZ0VP25Q"
+  };
 
-function login(){
-  auth.signInWithPopup(provider)
-    .then(() => {
-      document.getElementById("msg").innerText =
-        "Welcome back! Login successful.";
-    })
-    .catch(err => {
-      document.getElementById("msg").innerText = err.message;
-    });
-}
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
 
-function signup(){
-  auth.signInWithPopup(provider)
-    .then(() => {
-      document.getElementById("msg").innerText =
-        "Registration successful. You are now logged in.";
-    })
-    .catch(err => {
-      document.getElementById("msg").innerText = err.message;
-    });
-}
+  const msg = document.getElementById("msg");
+
+  function googleLogin(text){
+    signInWithPopup(auth, provider)
+      .then(() => {
+        msg.innerText = text;
+      })
+      .catch(err => {
+        msg.innerText = err.message;
+      });
+  }
+
+  document.getElementById("loginBtn").onclick = () => {
+    googleLogin("Welcome back! Login successful.");
+  };
+
+  document.getElementById("signupBtn").onclick = () => {
+    googleLogin("Registration successful. You are now logged in.");
+  };
 </script>
 
 </body>
